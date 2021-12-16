@@ -107,22 +107,22 @@ def stop():
         print("\x1b[31mNo hi ha connexió amb el robot.\x1b[0m")
 
 def forward(speed=100,speed_B=100,speed_C=100):
-    move(speed_B=min(abs(speed),abs(speed_B)),speed_C=min(abs(speed),abs(speed_C)))
-    
-def backward(speed=100,speed_B=100,speed_C=100):
     move(speed_B=-min(abs(speed),abs(speed_B)),speed_C=-min(abs(speed),abs(speed_C)))
     
+def backward(speed=100,speed_B=100,speed_C=100):
+    move(speed_B=min(abs(speed),abs(speed_B)),speed_C=min(abs(speed),abs(speed_C)))
+    
 def left(speed=100):
-    move(speed_B=0,speed_C=abs(speed))
+    move(speed_B=0,speed_C=-abs(speed))
 
 def left_sharp(speed=100):
-    move(speed_B=-abs(speed),speed_C=abs(speed))
+    move(speed_B=abs(speed),speed_C=-abs(speed))
        
 def right(speed=100):
-    move(speed_B=abs(speed),speed_C=0)
+    move(speed_B=-abs(speed),speed_C=0)
 
 def right_sharp(speed=100):
-    move(speed_B=abs(speed),speed_C=-abs(speed))
+    move(speed_B=-abs(speed),speed_C=abs(speed))
 
 def move(speed_B=0,speed_C=0):
     max_speed = 100
