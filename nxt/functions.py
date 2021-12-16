@@ -36,7 +36,7 @@ def next_notebook(nb):
     else:
         pass
 
-import nxt.bluesock
+import nxt.locator
 import nxt.motor
 
 import math
@@ -65,16 +65,16 @@ def connect():
 		  10: '00:16:53:17:92:8A', \
 		  11: '00:16:53:17:94:E0', \
 		  12: '00:16:53:1A:C6:BD'}
-        brick = nxt.bluesock.BlueSock(address[n]).connect()
-        mB = nxt.motor.Motor(brick, nxt.motor.PORT_B)
-        mC = nxt.motor.Motor(brick, nxt.motor.PORT_C)
-        s1 = nxt.sensor.Touch(brick, nxt.sensor.PORT_1)
-        s2 = nxt.sensor.Sound(brick, nxt.sensor.PORT_2)
+        brick = nxt.locator.find(host=address[n])
+        mB = nxt.motor.Motor(brick, nxt.motor.Port.B)
+        mC = nxt.motor.Motor(brick, nxt.motor.Port.C)
+        s1 = nxt.sensor.generic.Touch(brick, nxt.sensor.Port.S1)
+        s2 = nxt.sensor.generic.Sound(brick, nxt.sensor.Port.S2)
         s2.set_input_mode(0x08,0x80) # dB adjusted, percentage
-        s3 = nxt.sensor.Light(brick, nxt.sensor.PORT_3)
+        s3 = nxt.sensor.generic.Light(brick, nxt.sensor.Port.S3)
         s3.set_illuminated(True)
         s3.set_input_mode(0x05,0x80) # Light active, percentage
-        s4 = nxt.sensor.Ultrasonic(brick, nxt.sensor.PORT_4)
+        s4 = nxt.sensor.generic.Ultrasonic(brick, nxt.sensor.Port.S4)
         tempo = 0.5
         connected_robot = n
         print("\x1b[32mRobot %d connectat.\x1b[0m" % n)
@@ -93,7 +93,7 @@ def connect():
 
 def disconnect():
     try:
-        brick.sock.close()
+        brick.close()
         print("\x1b[32mRobot %d desconnectat.\x1b[0m" % connected_robot)
     except NameError:
         print("\x1b[31mNo hi ha connexió amb el robot.\x1b[0m")
@@ -154,13 +154,13 @@ def sound():
 def light():
     return s3.get_lightness()
 
-from nxt.telegram import InvalidOpcodeError, InvalidReplyError
+from nxt.error import ProtocolError
 
 def ultrasonic():
     global s4
     try:
         return s4.get_distance()
-    except (InvalidOpcodeError, InvalidReplyError):
+    except ProtocolError:
         disconnect()
         print("\x1b[33mError de connexió, reintentant...\x1b[0m")
         time.sleep(1)
