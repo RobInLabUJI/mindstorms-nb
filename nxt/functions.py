@@ -38,6 +38,7 @@ def next_notebook(nb):
 
 import nxt.locator
 import nxt.motor
+import nxt.sensor.generic
 
 import math
 import time
@@ -70,10 +71,10 @@ def connect():
         mC = nxt.motor.Motor(brick, nxt.motor.Port.C)
         s1 = nxt.sensor.generic.Touch(brick, nxt.sensor.Port.S1)
         s2 = nxt.sensor.generic.Sound(brick, nxt.sensor.Port.S2)
-        s2.set_input_mode(0x08,0x80) # dB adjusted, percentage
+        # s2.set_input_mode(0x08,0x80) # dB adjusted, percentage
         s3 = nxt.sensor.generic.Light(brick, nxt.sensor.Port.S3)
         s3.set_illuminated(True)
-        s3.set_input_mode(0x05,0x80) # Light active, percentage
+        # s3.set_input_mode(0x05,0x80) # Light active, percentage
         s4 = nxt.sensor.generic.Ultrasonic(brick, nxt.sensor.Port.S4)
         tempo = 0.5
         connected_robot = n
