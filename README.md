@@ -40,7 +40,7 @@ Switch it on, that's all!
 
 ### Computer
 
-Download this repo, run the script `./run.sh` in the root folder, and enjoy!
+Download this repo, run the script `./run.bash` in the root folder, and enjoy!
 
 ## Try-a-Bot: an open source guide for robot programming
 
