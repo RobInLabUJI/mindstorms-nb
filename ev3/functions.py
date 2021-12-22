@@ -37,12 +37,11 @@ def next_notebook(nb):
     else:
         pass
 
-import rpyc
-import socket
+import ev3_dc as ev3
 
 def connect():
-    global conn
-    global ev3
+    global brick
+    global address
     global mB; global mC
     global ts; global gy; global us; global cl; global so
     global snd
@@ -52,48 +51,42 @@ def connect():
          config = json.load(f)
     n = config['number']
     try:
-        address = {1: '192.168.0.204',\
-		   2: '192.168.0.212',\
-		   3: '192.168.0.213',\
-		   4: '192.168.0.205',\
-		   5: '192.168.0.202'}
-        conn = rpyc.classic.connect(address[n]) 
-        ev3 = conn.modules['ev3dev.ev3']
-        mB = ev3.LargeMotor('outB')
-        mC = ev3.LargeMotor('outC')
-        ts = ev3.TouchSensor()
-        # echo 'lego-nxt-sound' > /sys/class/lego_port/port1/set_device
-        so = ev3.SoundSensor('in2')
-        so.mode='DB'
-        us = ev3.UltrasonicSensor()
-        us.mode='US-DIST-CM'
-        cl = ev3.ColorSensor()
-        cl.mode='COL-REFLECT'
-        snd = ev3.Sound()
-        tempo = 0.25
+        address = {1: '',\
+		   2: '',\
+		   3: '',\
+		   4: '',\
+		   5: '00:16:53:53:83:0C'}
+        brick = ev3.EV3(protocol=ev3.BLUETOOTH, host=address[n])
+        mB = ev3.Motor(ev3.PORT_B, ev3_obj=brick)
+        mC = ev3.Motor(ev3.PORT_C, ev3_obj=brick)
+        ts = ev3.Touch(ev3.PORT_1, ev3_obj=brick)
+        #so = ev3.SoundSensor('in2')
+        #so.mode='DB'
+        us = ev3.Ultrasonic(ev3.PORT_4, ev3_obj=brick)
+        cl = ev3.Color(ev3.PORT_3, ev3_obj=brick)
+        #snd = ev3.Sound()
+        #tempo = 0.25
         connected_robot = n
         print("\x1b[32mRobot %d connectat.\x1b[0m" % n)
     except KeyError:
         print("\x1b[31mNúmero de robot incorrecte.\x1b[0m")
-    except ConnectionRefusedError:
+    except ev3.exceptions.NoEV3:
         print("\x1b[31mNo es pot connectar amb el robot.\x1b[0m")
-    except socket.timeout:
-        print("\x1b[33mTimeout. Intenta-ho de nou, si segueix sense funcionar avisa el professor.\x1b[0m")
     except OSError:
         print("\x1b[33mError de connexió. Intenta-ho de nou, si segueix sense funcionar avisa el professor.\x1b[0m")
 
 def disconnect():
     try:
-        conn.close()
+        brick.__del__()
         print("\x1b[32mRobot %d desconnectat.\x1b[0m" % connected_robot)
     except NameError:
         print("\x1b[31mNo hi ha connexió amb el robot.\x1b[0m")
 
 def stop():
     try:
-        mB.stop(stop_action="brake")
-        mC.stop(stop_action="brake")
-    except (NameError,EOFError):
+        mB.stop()
+        mC.stop()
+    except (NameError, EOFError, OSError):
         print("\x1b[31mNo hi ha connexió amb el robot.\x1b[0m")
 
 def forward(speed=100,speed_B=100,speed_C=100):
@@ -114,10 +107,14 @@ def left_sharp(speed=100):
 def right_sharp(speed=100):
     move(speed_B=abs(speed),speed_C=-abs(speed))
 
+import math
+
 def move(speed_B=0,speed_C=0):
-    max_speed = 200
-    speed_B = int(speed_B)
-    speed_C = int(speed_C)
+    max_speed = 100
+    direction_B = int(math.copysign(1, speed_B))
+    speed_B = int(abs(speed_B))
+    direction_C = int(math.copysign(1, speed_C))
+    speed_C = int(abs(speed_C))
     if speed_B > 100:
         speed_B = 100
         print("\x1b[33mLa velocitat màxima és 100.\x1b[0m")
@@ -125,9 +122,17 @@ def move(speed_B=0,speed_C=0):
         speed_C = 100
         print("\x1b[33mLa velocitat màxima és 100.\x1b[0m")
     try:
-        mB.run_forever(speed_sp=int(speed_B*max_speed/100))
-        mC.run_forever(speed_sp=int(speed_C*max_speed/100))
-    except (NameError,EOFError):
+        speed_B = int(speed_B*max_speed/100)
+        speed_C = int(speed_C*max_speed/100)
+        if speed_B > 0:
+            mB.speed=speed_B
+        if speed_C > 0:
+            mC.speed=speed_C
+        if speed_B > 0:
+            mB.start_move(direction=direction_B)
+        if speed_C > 0:
+            mC.start_move(direction=direction_C)
+    except (NameError, EOFError, OSError):
         print("\x1b[31mNo hi ha connexió amb el robot.\x1b[0m")
     
 def touch():
