@@ -64,8 +64,8 @@ def connect():
         #so.mode='DB'
         us = ev3.Ultrasonic(ev3.PORT_4, ev3_obj=brick)
         cl = ev3.Color(ev3.PORT_3, ev3_obj=brick)
-        #snd = ev3.Sound()
-        #tempo = 0.25
+        snd = ev3.Sound(ev3_obj=brick)
+        tempo = 0.25
         connected_robot = n
         print("\x1b[32mRobot %d connectat.\x1b[0m" % n)
     except KeyError:
@@ -136,28 +136,31 @@ def move(speed_B=0,speed_C=0):
         print("\x1b[31mNo hi ha connexió amb el robot.\x1b[0m")
     
 def touch():
-    return bool(ts.value())
+    return ts.touched
 
 #def gyro():
 #    return gy.value()
 
 def sound():
-    return int(100-so.value()/10)
+    return 0
 
 def ultrasonic():
-    return us.value()/10
+    try:
+        return us.distance / 10
+    except TypeError:
+        return 2.55
 
 def light():
-    return cl.value()
+    return cl.reflected
 
-def beep():
-    snd.beep()
+#def beep():
+#    snd.beep()
     
 def play_tone(f,t):
-    snd.tone(f,int(t*1000*tempo)).wait()
+    snd.tone(f,int(t*tempo))
     
-def speak(s):
-    snd.speak(s).wait()
+#def speak(s):
+#    snd.speak(s).wait()
     
 from IPython.display import clear_output
 
@@ -173,7 +176,7 @@ def test_sensors():
     try:
         while True:
             clear_output(wait=True)
-            print("     Touch: %d\n     Light: %d\n     Sound: %d\nUltrasonic: %d" % (touch(),light(),sound(), ultrasonic()))
+            print("     Touch: %d\n     Light: %d\n     Sound: %d\nUltrasonic: %.2f" % (touch(),light(),sound(), ultrasonic()))
     except KeyboardInterrupt:
         pass
     
