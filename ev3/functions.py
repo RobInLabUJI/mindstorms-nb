@@ -51,10 +51,10 @@ def connect():
          config = json.load(f)
     n = config['number']
     try:
-        address = {1: '',\
-		   2: '',\
+        address = {1: '00:16:53:51:07:8F',\
+		   2: '00:16:53:53:F1:8D',\
 		   3: '',\
-		   4: '',\
+		   4: '00:16:53:51:5F:3C',\
 		   5: '00:16:53:53:83:0C'}
         brick = ev3.EV3(protocol=ev3.BLUETOOTH, host=address[n])
         mB = ev3.Motor(ev3.PORT_B, ev3_obj=brick)
